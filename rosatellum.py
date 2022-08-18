@@ -187,14 +187,14 @@ def riassegna_ecc_def_collegio(liste, circoscrizioni, seggi_circ, fraz_circ, seg
             max_ecc=max_tiebreak(eccdef,tiebreak_ecc)
         else:
             max_ecc=max_tiebreak_minFraz(eccdef, fcinv, liste)
-        print("max eccedente:", max_ecc)
-        print("eccedenti: ", fraz_circ_inv[max_ecc])
+        #print("max eccedente:", max_ecc)
+        #print("eccedenti: ", fraz_circ_inv[max_ecc])
         min_max_ecc=min(fraz_circ_inv[max_ecc],key=fraz_circ_inv[max_ecc].get)
-        print("collegio minimo eccedente:", min_max_ecc)
+        #print("collegio minimo eccedente:", min_max_ecc)
         min_def=min(eccdef, key=eccdef.get)
-        print("min deficitario:", min_def) #gestire parità
+        #print("min deficitario:", min_def) #gestire parità
         max_min_def=max(fraz_circ_inv[min_def],key=fraz_circ_inv[min_def].get)
-        print("collegio massimo deficitario:", max_min_def)
+        #print("collegio massimo deficitario:", max_min_def)
         seggi_circ_result[max_min_def][min_def]+=1
         seggi_circ_result[min_max_ecc][max_ecc]-=1
         del fraz_circ_inv[max_ecc][min_max_ecc]
