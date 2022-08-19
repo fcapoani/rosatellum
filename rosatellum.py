@@ -54,7 +54,7 @@ def quozienti_interi_migliori_resti(numero_seggi, liste, cifre, quoziente, max_s
     list_resti=[]
     list_fraz=[]
     seggi_ass=0
-#    print("Da assegnare: ", numero_seggi)
+    print("Da assegnare: ", numero_seggi)
     for l in liste:
         try:
             cifra=cifre[l]
@@ -71,7 +71,7 @@ def quozienti_interi_migliori_resti(numero_seggi, liste, cifre, quoziente, max_s
         else:
             resto_lista= cifra % quoziente
         fraz=cifra/quoziente - seggi_lista
-#        print("Quozienti interi: ", seggi_lista, ", ", l)
+        print("Quozienti interi: ", seggi_lista, ", ", l)
         list_seggi.append([l,seggi_lista])
         list_resti.append([l,resto_lista])
         list_fraz.append([l,fraz])
@@ -82,7 +82,7 @@ def quozienti_interi_migliori_resti(numero_seggi, liste, cifre, quoziente, max_s
     seggi_resti=numero_seggi-seggi_ass
     for r in range(1,seggi_resti+1):
         win_resto=max(list_resti,key=list_resti.get)
-#        print("Resto ", r, ": ", win_resto)
+        print("Resto ", r, ": ", win_resto)
         list_seggi[win_resto]+=1
         list_resti[win_resto]=0
         #parità di resti?
@@ -97,16 +97,16 @@ def inv_dict(d):
 
 def resti_validi(ed_dict, fraz,circ):
     res=False
-#    print("Cerco resti")
+    print("Cerco resti")
     for ed_list, ed_val in ed_dict.items():
         try:
             ed_fraz=fraz[ed_list][circ]
         except KeyError:
             ed_fraz=0
-#        print(ed_list, ed_val, ed_fraz)
+        print(ed_list, ed_val, ed_fraz)
         if(ed_val<0 and ed_fraz > 0):
             return True
-#    print("Resti non validi")
+    print("Resti non validi")
     return False
 
 def max_tiebreak(_dict, tb_list):
@@ -182,24 +182,32 @@ def riassegna_ecc_def_collegio(liste, circoscrizioni, seggi_circ, fraz_circ, seg
             eccdef[l]=seggi_l - st
 #       eccdef=remove_if(eccdef,0)
         #prendi max eccedente (TODO: gestire parità
-        print(eccdef)
+        print("eccedentari e deficitari:")
+        print(remove_if(eccdef.copy(),0))
         if not minFraz:
             max_ecc=max_tiebreak(eccdef,tiebreak_ecc)
         else:
             max_ecc=max_tiebreak_minFraz(eccdef, fcinv, liste)
-        #print("max eccedente:", max_ecc)
-        #print("eccedenti: ", fraz_circ_inv[max_ecc])
-        min_max_ecc=min(fraz_circ_inv[max_ecc],key=fraz_circ_inv[max_ecc].get)
-        #print("collegio minimo eccedente:", min_max_ecc)
+        print("max eccedente:", max_ecc)
+        print("eccedenti: ", fraz_circ_inv[max_ecc])
+        eccedente_ok=False
+        while not eccedente_ok:
+            min_max_ecc=min(fraz_circ_inv[max_ecc],key=fraz_circ_inv[max_ecc].get)
+            print("collegio minimo eccedente:", min_max_ecc)
+            if(seggi_circ_result[min_max_ecc][max_ecc] > 0):
+                eccedente_ok=True
+            else:
+                print("Non valido, ritento")
+                del fraz_circ_inv[max_ecc][min_max_ecc]
         min_def=min(eccdef, key=eccdef.get)
-        #print("min deficitario:", min_def) #gestire parità
+        print("min deficitario:", min_def) #gestire parità
         max_min_def=max(fraz_circ_inv[min_def],key=fraz_circ_inv[min_def].get)
-        #print("collegio massimo deficitario:", max_min_def)
+        print("collegio massimo deficitario:", max_min_def)
         seggi_circ_result[max_min_def][min_def]+=1
         seggi_circ_result[min_max_ecc][max_ecc]-=1
         del fraz_circ_inv[max_ecc][min_max_ecc]
         del fraz_circ_inv[min_def][max_min_def]
-
+    print("Risultato collegio:", remove_if(seggi_circ_result.copy(),0))
     return seggi_circ_result
 
 
@@ -245,16 +253,18 @@ def riassegna_ecc_def(liste, circoscrizioni, seggi_circ, fraz_circ, seggi_tot, t
                 st=0
             eccdef[l]=seggi_l - st
 #       eccdef=remove_if(eccdef,0)
+        print("eccedentari e deficitari:")
+        print(remove_if(eccdef.copy(),0))
         #prendi max eccedente (TODO: gestire parità
         #print(eccdef)
         if not minFraz:
             max_ecc=max_tiebreak(eccdef,tiebreak_ecc)
         else:
             max_ecc=max_tiebreak_minFraz(eccdef, fcinv, liste)
-#        print("max eccedente:", max_ecc)
-#        print("eccedenti: ", fraz_circ_inv[max_ecc])
+        print("max eccedente:", max_ecc)
+        print("eccedenti: ", fraz_circ_inv[max_ecc])
         min_max_ecc=min(fraz_circ_inv[max_ecc],key=fraz_circ_inv[max_ecc].get)
-#        print("min eccedente:", min_max_ecc)
+        print("min eccedente:", min_max_ecc)
         
         if(resti_validi(eccdef, fraz_circ_inv, min_max_ecc)):
             seggi_circ_result[min_max_ecc][max_ecc]-=1
@@ -262,15 +272,15 @@ def riassegna_ecc_def(liste, circoscrizioni, seggi_circ, fraz_circ, seggi_tot, t
 
             for ed_list, ed_val in eccdef.items():
                  if(ed_val < 0):
-#                     print("Deficitario possibile", ed_list)
+                     print("Deficitario possibile", ed_list)
                      try:
                          def_list.append([ed_list,fraz_circ[min_max_ecc][ed_list]])
                      except KeyError:
                          pass
             def_list=dict(def_list)
-#            print("deficitari in ", min_max_ecc, ":", def_list)
+            print("deficitari in ", min_max_ecc, ":", def_list)
             max_def=max(def_list,key=def_list.get)
-#            print("seggio assegnato a ", max_def)
+            print("seggio assegnato a ", max_def)
             seggi_circ_result[min_max_ecc][max_def]+=1
 
             del fraz_circ[min_max_ecc][max_def]
@@ -317,9 +327,11 @@ def rosatellum_camera(numero_seggi, file_risultati, file_seggi_circoscrizioni, f
         if lista_ammessa_riparto(lista):
             if coalizione_ammessa(list_coal[lista]):
                 if list_coal[lista] not in admitted_coal:
+                    print("Coalizione ammessa:", list_coal[lista])
                     admitted_coal.append(list_coal[lista])
             else:
                 admitted_list.append(lista)
+                print("Lista singola ammessa:", lista)
     admitted_lc=admitted_list+ admitted_coal
     cifre_lc   ={**cifra_elett_naz,**cifra_elett_naz_coal}
 
@@ -328,7 +340,7 @@ def rosatellum_camera(numero_seggi, file_risultati, file_seggi_circoscrizioni, f
     for lc in admitted_lc:
         quoz_elett_naz+=cifre_lc[lc]
     quoz_elett_naz=floor(quoz_elett_naz/numero_seggi)
-
+    print("Quoziente elettorale nazionale: ", quoz_elett_naz)
     #ripartisci seggi nazionali (coalizioni e liste singole)
     seggi_lc, resti_lc, fraz_lc = quozienti_interi_migliori_resti(numero_seggi, admitted_lc, cifre_lc, quoz_elett_naz)
     #ripartisci seggi nazionali coalizioni tra le liste
@@ -406,7 +418,7 @@ def rosatellum_camera(numero_seggi, file_risultati, file_seggi_circoscrizioni, f
     #print(seggi_liste_circ)
 
     ###divisione in collegi
-    #print("Divisione in collegi")
+    print("Divisione in collegi")
     collegi = get_unique_list(df,nome_coll)
     coll_seggi = pd.read_csv(file_seggi_collegi, delimiter=delim, index_col=0,squeeze=True).to_dict()
     cifra_elett_coll_coal = get_df_groupby2_sum(df,nome_coll,nome_coal,nome_voti)
@@ -419,14 +431,16 @@ def rosatellum_camera(numero_seggi, file_risultati, file_seggi_circoscrizioni, f
     
     seggi_liste_coll = {}
     for circ in circoscrizioni:
-            #print("Seggi totali: ", seggi_liste_circ[circ])
+            print("Seggi totali in ", circ, ": ", seggi_liste_circ[circ])
             cifre_lc_coll={}
             fraz_lc_coll={}
             seggi_lc_coll={}
+            liste_ammesse_circ=seggi_liste_circ[circ].keys()
             for coll in collegi_circ[circ]:
                 cifre_lc_coll[coll]={}
                 quoz_elett_coll=0
-                for l in liste: 
+#               for l in liste:
+                for l in liste_ammesse_circ: #usa solo liste ammesse 
                     #determina il quoziente elettorale di collegio dividendo la somma delle cifre elettorali 
                     #di collegio di *tutte le liste* per il numero dei seggi da attribuire nel collegio stesso
                     try:
@@ -438,11 +452,14 @@ def rosatellum_camera(numero_seggi, file_risultati, file_seggi_circoscrizioni, f
                 quoz_elett_coll = floor(quoz_elett_coll / coll_seggi[coll])
  
                 #cifra_elett_coll_lc={**cifra_elett_coll_list,**cifra_elett_coll_coal}
-
-                seggi_lc_coll[coll], resti_lc_coll, fraz_lc_coll[coll] = quozienti_interi_migliori_resti(coll_seggi[coll], liste, cifre_lc_coll[coll], quoz_elett_coll, max_seggi=True, max_seggi_list=seggi_liste_circ[circ])
-#               print(coll, seggi_lc_coll[coll])
+                
+                seggi_lc_coll[coll], resti_lc_coll, fraz_lc_coll[coll] = quozienti_interi_migliori_resti(coll_seggi[coll], liste_ammesse_circ, cifre_lc_coll[coll], quoz_elett_coll, max_seggi=True, max_seggi_list=seggi_liste_circ[circ])
+                print("Assegnazione iniziale ", coll, ":")
+                print(coll, seggi_lc_coll[coll])
 #                     def riassegna_ecc_def(liste, circoscrizioni,     seggi_circ,   fraz_circ,    seggi_tot):
-            seggi_lc_coll=riassegna_ecc_def_collegio(liste, collegi_circ[circ], seggi_lc_coll,fraz_lc_coll,seggi_liste_circ[circ],minFraz=True) 
+        
+            print("Riassegnazioni:")
+            seggi_lc_coll=riassegna_ecc_def_collegio(liste_ammesse_circ, collegi_circ[circ], seggi_lc_coll,fraz_lc_coll,seggi_liste_circ[circ],minFraz=True) 
             
             for coll in collegi_circ[circ]:
                 seggi_liste_coll[coll] = remove_if(seggi_lc_coll[coll],0)
